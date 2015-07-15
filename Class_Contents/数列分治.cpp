@@ -63,9 +63,6 @@ int main()
     }
     f(0, N-1);
     cout<<ans<<endl;
-    if (is_sorted(sorted, sorted + N)){
-        cout << (N * (N - 1)) / 2 << endl;
-    }
     return 0;
 }
 
