@@ -1,22 +1,22 @@
 /*
- 题意：Give an N(N<=100000) number sequence, find the number of pair of (i,j),   
-      for which i<j and ai>aj.
- 思路：利用merge sort中的分治法的思想，实际上整个求解的过程只是跑一遍merge sort。在merge sort中
-      注意，找到一个左边的元素比右边的元素大时，就要加上剩下的左边的元素。
-*/
+ 定理：一个乱序序列的 逆序数 = 在只允许相邻两个元素交换的条件下,得到有序序列的交换次数
+ Problem ID: POJ 1804
+ 
+ 求逆序数用数列分治：思路：利用merge sort中的分治法的思想，实际上整个求解的过程只是跑一遍merge sort。在merge sort中
+ 注意，找到一个左边的元素比右边的元素大时，就要加上剩下的左边的元素。
+ */
 
 #include <iostream>
-#include <algorithm>
 
 using namespace std;
 
-const int MAX = 100000;
+const int MAX = 2000;
+int N;
 int arr[MAX];
 int sorted[MAX];
-int N;
 int ans;
 
-void f(int left, int right)
+void solve(int left, int right)
 {
     if(left==right)
     {
@@ -24,45 +24,59 @@ void f(int left, int right)
         return;
     }
     int mid = (left+right)/2;
-    f(left, mid);
-    f(mid+1,right);
-    int index = left;
+    solve(left, mid);
+    solve(mid+1, right);
     int index1 = left;
     int index2 = mid+1;
+    int index = left;
+    int temp[MAX];
     while(index1<=mid && index2<=right)
     {
-        if(arr[index1]>arr[index2])
+        if(sorted[index1]>sorted[index2])
         {
-            ans += mid-index1+1;
-            sorted[index++] = arr[index2++];
+            ans+=mid-index1+1;
+            temp[index++] = sorted[index2++];
         }
         else
         {
-            sorted[index++] = arr[index1++];
+            temp[index++] = sorted[index1++];
         }
     }
     
-    while(index1++<=mid)
+    while(index1<=mid)
     {
-        sorted[index++] = arr[index1++];
+        temp[index++] = sorted[index1++];
     }
     
-    while(index2++<=right)
+    while(index2<=right)
     {
-        sorted[index++] = arr[index2++];
+        temp[index++] = sorted[index2++];
     }
+    
+    for(int i=left; i<=right; i++)
+    {
+        sorted[i] = temp[i];
+    }
+        
 }
 
 int main()
 {
-    ans = 0;
     cin>>N;
-    for(int i=0; i<N; i++)
+    int cnt = 1;
+    int t;
+    while(N--)
     {
-        cin >> arr[i];
+        ans = 0;
+        cout<<"Scenario #"<<cnt++<<":"<<endl;
+        cin>>t;
+        for(int i=0; i<t; i++)
+        {
+            cin>>arr[i];
+        }
+        solve(0, t-1);
+        cout<<ans<<endl;
+        cout<<endl;
     }
-    f(0, N-1);
-    cout<<ans<<endl;
     return 0;
 }
-
