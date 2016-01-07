@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int t;
+int n, k, w;
+int a[30010];
+int dp[30010][510];
+int pre[30010];
+
+int main()
+{
+    scanf("%d", &t);
+    while(t--)
+    {
+        scanf("%d%d%d", &n, &k, &w);
+        int tmp = 0;
+        for(int i=1; i<=n; i++)
+        {
+            scanf("%d", &a[i]);
+            tmp += a[i];
+            pre[i] = tmp;
+        }
+        for(int j=1; j<=k; j++) dp[1][j] = pre[w]-pre[0];
+        for(int i=2; i<=n; i++)
+        {
+            for(int j=1; j<=k; j++)
+            {
+                dp[i][j] = 0;
+                if(i-w<1)
+                {
+                    dp[i][j] = dp[i-1][j];
+                    dp[i][j] = max(dp[i][j], pre[min(i+w-1, n)]-pre[i-1]);
+                }
+                else
+                {
+                    dp[i][j] = dp[i-1][j];
+                    dp[i][j] = max(dp[i][j], dp[i-w][j-1]+pre[min(i+w-1, n)]-pre[i-1]);
+                }
+            }
+        }
+        printf("%d\n", dp[n][k]);
+    }
+    return 0;
+}
