@@ -1,4 +1,4 @@
-# Informatics
+# Competitive Programming
 This repositroy keeps track of my informatics learning.
 
 I put interesting and thought-provoking problems here.
