@@ -12,6 +12,10 @@ Problems are from well-known OJs, include:
 
 >UVaOJ (http://uva.onlinejudge.org/)
 
+>DMOJ (https://dmoj.ca/)
+
+>WCIPEG (http://wcipeg.com/)
+
 Besides OJ problems, I also put my programming class notes and my old Java templates.
 
 Hope you enjoy problem solving!
