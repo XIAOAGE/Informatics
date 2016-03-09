@@ -13,11 +13,11 @@ struct edge
 typedef pair<int, int> node;
 
 int t, n, m;
-int map[110][110];
-vector<int> v[110];
-int maxd[110][110];
-bool T[110][110];
-vector<edge> e;
+int map[110][110];  //边的长度
+vector<int> v[110]; //邻接表
+int maxd[110][110]; //记录在做小生成树上从一个点到另一个点的最大值
+bool T[110][110]; //用来记录哪些边已经用过了
+vector<edge> e; //放入所有的边
 
 int MST()
 {
@@ -57,11 +57,12 @@ int MST()
 
 bool second_MST()
 {
+    //枚举所有不在T中的边u-v,加入边u-v,删除权值为max[u][v]的边,不断枚举找到次小生成树.
     for(int i=0; i<e.size(); i++)
     {
         if(T[e[i].node1][e[i].node2]) continue;
-        int max_edge = maxd[e[i].node1][e[i].node2];
-        if(max_edge-e[i].cost==0) return true;
+        //nt max_edge = maxd[e[i].node1][e[i].node2];
+        //if(max_edge-e[i].cost==0) return true;
     }
     return false;
 }
@@ -77,6 +78,7 @@ void solve()
         }
     }
     int ans = MST();
+    /*
     if(second_MST())
     {
         cout<<"Not Unique!"<<endl;
@@ -85,6 +87,7 @@ void solve()
     {
         cout<<ans<<endl;
     }
+    */
 }
 
 int main()
