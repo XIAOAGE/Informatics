@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!---
+Card game project produced Bryan, Walter and Jaz.
+	
+The goal of this game is to matching each card with the other one
+with the same color and number value.
+
+3/17/2016
+ICS4U Mr Krnic
+Computer Quiz Assignment
+-->
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Panel id="pnlTable" title="Matching" width="1300" height="550" layout="absolute">
+		<mx:Button id="btnStart" label="Marking Mode" x="10" y="10" click="initCheat()"/>
+		<mx:Button id="btnCheat" label="Start" x="130" y="10" click="newGame()"/>
+		<mx:Label id="lblResult" x="200" y="10"/>
+	</mx:Panel>
+	<mx:Script>
+		<![CDATA[
+			/****************Imports**************/
+			import flash.events.MouseEvent;
+			import mx.controls.Image;
+			import flash.events.TimerEvent;
+			import mx.effects.easing.Back;
+		
+			/****************variables************/
+			private var deck:Array = new Array();    //contains each card
+			private var back:Array = new Array();    //contains each card's back with different name properties
+			private var cardA:Image;			  	 //the card that player first select
+			private var cardB:Image;			     //the card that player second select
+			private var hasEvt: Array = new Array(); //boolean array to record the cards that have been matched
+			private var flag:Number = 0;			 //the integer used to determine if this is the first or second selected card
+			private var cnt:Number = 0; 			 //the integer to count the number of pairs of cards that have been matched
+			
+			/****************functions************/
+			
+			//too fill the deck array
+			private function createDeck():void {
+				//insert cards
+				var tempCard:Image;
+				for (var x:int = 1; x <= 52; x++) {
+					tempCard = new Image();
+					tempCard.source = "../assets/cards/card" + x + ".JPG";
+					if (x >= 1 && x <= 13) tempCard.name = "b" + x;
+					else if (x >= 14 && x <= 26) tempCard.name = "r" + (x - 13);
+					else if (x >= 27 && x <= 39) tempCard.name = "r" + (x - 26);
+					else if (x >= 40 && x <= 52) tempCard.name = "b" + (x - 39);
+					deck[x - 1] = tempCard; //insert the image into the deck array.
+				}
+			}
+			
+			//too fill the back array
+			private function createBack():void{
+				//insert cards
+				var tempCard:Image;
+				for (var x:int = 1; x <= 52; x++) {
+					tempCard = new Image();
+					tempCard.source = "../assets/cards/card53.JPG";
+					tempCard.name = x + "";
+					tempCard.addEventListener(MouseEvent.CLICK, selectCard);
+					back[x - 1] = tempCard; //insert the image into the deck array.
+				}
+			}
+			
+			//we creat a function about click
+			private function selectCard(evt:MouseEvent):void {
+				//process the first-selected card
+				if (flag % 2 == 0)
+				{
+					cardA = Image(evt.currentTarget);
+					cardA.removeEventListener(MouseEvent.CLICK, selectCard);
+					var id:Number = Number(cardA.name);
+					cardA.source = "../assets/cards/card" + id + ".JPG";
+					flag = 1;
+				}
+				//process the second-selecte card
+				else 
+				{
+					cardB = Image(evt.currentTarget);
+					cardA.addEventListener(MouseEvent.CLICK, selectCard);
+					id = Number(cardB.name);
+					cardB.source = "../assets/cards/card" + id + ".JPG";
+					var tmp1:Number = Number(cardA.name)-1;
+					var tmp2:Number = Number(cardB.name) - 1;
+					if (deck[tmp1].name == deck[tmp2].name)
+					{
+						cnt++;
+						//since 2 cards are matched, remove the click event on both images.
+						cardA.removeEventListener(MouseEvent.CLICK, selectCard);
+						cardB.removeEventListener(MouseEvent.CLICK, selectCard);
+						hasEvt[tmp1] = true;
+						hasEvt[tmp2] = true;
+						flag = 0;
+						if (cnt == 26)
+						{
+							lblResult.text = "Congrats!!! You complete this game!!!!!!! Amazing!!!!!";
+							//This is the third timer used to display the result for 6 seconds
+							var timer3:Timer = new Timer(6000);
+							var afterWaiting3:Function = function(event:TimerEvent):void {
+							   timer3.removeEventListener(TimerEvent.TIMER, afterWaiting3);
+							   timer3 = null; 
+							   cnt = 0;
+							   flag = 0;
+							   newGame();
+							}
+							timer3.addEventListener(TimerEvent.TIMER, afterWaiting3);
+							timer3.start();
+						}
+					}
+					else
+					{
+						//remove all the event listeners
+						for (var x:Number = 0; x < back.length; x++) back[x].removeEventListener(MouseEvent.CLICK, selectCard);
+						//this is the first timer used to display the cards for 0.5 seconds if two cards don't match
+						var timer:Timer = new Timer(500);
+						var afterWaiting:Function = function(event:TimerEvent):void {
+						   timer.removeEventListener(TimerEvent.TIMER, afterWaiting);
+						   timer = null;
+						   cardA.source = "../assets/cards/card53.JPG";
+						   cardB.source = "../assets/cards/card53.JPG";
+						   
+						   //this is the second timer to prevent player from clicking other cards when displaying the selected 2 cards
+						   var timer2:Timer = new Timer(10);
+						   var afterWaiting2:Function = function(event:TimerEvent):void {
+							   timer2.removeEventListener(TimerEvent.TIMER, afterWaiting2);
+							   timer2 = null;
+							   //add the events listeners back for those cards haven't been matched
+							   for (x = 0; x < back.length; x++) if (!hasEvt[Number(back[x].name)-1]) back[x].addEventListener(MouseEvent.CLICK, selectCard);
+							   flag = 0;
+						   }
+						   timer2.addEventListener(TimerEvent.TIMER, afterWaiting2);
+						   timer2.start();
+						}
+						timer.addEventListener(TimerEvent.TIMER, afterWaiting);
+						timer.start();
+					}
+				}
+			}
+			
+			//shuffle the back array for the new game
+			private function shuffleDeck(cards:Array):void {
+				var tmpCard:Image = null;
+				var rNumber:Number = 0;
+				for ( var x:int = 0; x < (cards.length); x++) {
+					rNumber=Math.round(Math.random() * (cards.length - 1));
+					tmpCard = cards[rNumber];
+					cards.splice(rNumber, 1);	//pop the card out from the cards array
+					cards.push(tmpCard);	//insert the card into the cards array
+				}
+			}
+			
+			//display the back array on the table
+			private function displayDeckOnTable(cards:Array):void {
+				var tempCard:Image = null;
+				var row:Number = 50;  //card's row position	
+				var col:Number = 0.1; //card's col position
+				for (var x:int = 1; x <= cards.length; x++) {
+					tempCard = cards[x - 1];
+					tempCard.width = 100;
+					tempCard.height = 100;
+					tempCard.x = col * 100;
+					col += 1;
+					tempCard.y = row;	
+					pnlTable.addChild(tempCard);
+					//13 cards for each row
+					if (x % 13 == 0) { row += 100; col = 0.1; }
+				}
+			}
+			
+			//Game start function for marking purpose
+			private function initCheat():void{
+				//initialize everything
+				for (var x:Number = 0; x < back.length; x++) pnlTable.removeChild(back[x]);
+				for (x = 0; x < 52; x++) hasEvt[x] = false;
+				lblResult.text = "";
+				cnt = 0;
+				flag = 0;
+				createBack();
+				createDeck();
+				displayDeckOnTable(back);
+			}
+			
+			//Game start function for the game
+			private function newGame():void{
+				//inistialize everything
+				for (var x:Number = 0; x < back.length; x++) pnlTable.removeChild(back[x]);
+				for (x = 0; x < 52; x++) hasEvt[x] = false;
+				lblResult.text = "";
+				cnt = 0;
+				flag = 0;
+				createBack();
+				createDeck();
+				shuffleDeck(back);
+				displayDeckOnTable(back);
+			}
+			
+		]]>
+	</mx:Script>
+</mx:Application>
